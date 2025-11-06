@@ -43,7 +43,7 @@ pipeline {
             steps {
                 withAWS(credentials: 'aws-jenkins', region: "${AWS_REGION}") {
                     script {
-                        sh """
+                        bat """
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                         """
                     }
@@ -55,7 +55,7 @@ pipeline {
             steps {
                 script {
                     docker.image("${IMAGE_REPO_NAME}:${IMAGE_TAG}").tag("${ECR_URL}:${IMAGE_TAG}")
-                    sh "docker push ${ECR_URL}:${IMAGE_TAG}"
+                    bat "docker push ${ECR_URL}:${IMAGE_TAG}"
                 }
             }
         }
@@ -65,7 +65,7 @@ pipeline {
                 echo 'Deploying container on EC2...'
                 // Example: SSH into EC2 and run docker pull/run commands
                 sshagent (credentials: ['ec2-ssh-key']) {
-                    sh """
+                    bat """
                     ssh -o StrictHostKeyChecking=no ec2-user@<EC2_PUBLIC_IP> \
                     'docker pull ${ECR_URL}:${IMAGE_TAG} && \
                     docker stop webapp || true && docker rm webapp || true && \
