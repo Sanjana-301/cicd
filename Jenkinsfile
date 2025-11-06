@@ -6,6 +6,7 @@ pipeline {
         AWS_ACCOUNT_ID = '972775291931'
         IMAGE_REPO_NAME = 'cicd'
         IMAGE_TAG = "v${env.BUILD_NUMBER}"
+        EC2_URL = "972775291931.dkr.ecr.us-east-1.amazonws.com/cicd"
     }
 
     stages {
