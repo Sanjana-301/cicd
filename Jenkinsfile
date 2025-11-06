@@ -6,11 +6,9 @@ pipeline {
         AWS_ACCOUNT_ID = '972775291931'
         IMAGE_REPO_NAME = 'cicd'
         IMAGE_TAG = "v${env.BUILD_NUMBER}"
-        ECR_URL = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
     }
 
     stages {
-
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/Sanjana-301/cicd.git'
@@ -41,35 +39,33 @@ pipeline {
 
         stage('Login to AWS ECR') {
             steps {
-                withAWS(credentials: 'aws-jenkins', region: "${AWS_REGION}") {
-                    script {
-                        bat """
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                        """
-                    }
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-jenkins']]) {
+                    bat """
+                    aws ecr get-login-password --region ${AWS_REGION} ^
+                    | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                    """
                 }
             }
         }
 
         stage('Push Image to ECR') {
             steps {
-                script {
-                    docker.image("${IMAGE_REPO_NAME}:${IMAGE_TAG}").tag("${ECR_URL}:${IMAGE_TAG}")
-                    bat "docker push ${ECR_URL}:${IMAGE_TAG}"
-                }
+                bat """
+                docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
+                docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}
+                """
             }
         }
 
         stage('Deploy to EC2') {
             steps {
                 echo 'Deploying container on EC2...'
-                // Example: SSH into EC2 and run docker pull/run commands
                 sshagent (credentials: ['ec2-ssh-key']) {
                     bat """
-                    ssh -o StrictHostKeyChecking=no ec2-user@<EC2_PUBLIC_IP> \
-                    'docker pull ${ECR_URL}:${IMAGE_TAG} && \
-                    docker stop webapp || true && docker rm webapp || true && \
-                    docker run -d -p 80:3000 --name webapp ${ECR_URL}:${IMAGE_TAG}'
+                    ssh -o StrictHostKeyChecking=no ec2-user@<EC2_PUBLIC_IP> ^
+                    "docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} && ^
+                    docker stop webapp || true && docker rm webapp || true && ^
+                    docker run -d -p 80:3000 --name webapp ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"
                     """
                 }
             }
