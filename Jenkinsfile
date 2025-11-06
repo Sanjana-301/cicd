@@ -60,14 +60,14 @@ pipeline {
         stage('Deploy to EC2') {
             steps {
                 echo 'Deploying container on EC2...'
-                sshagent (credentials: ['ec2-ssh-key']) {
-                    bat """
-                    ssh -o StrictHostKeyChecking=no ec2-user@52.23.185.236 ^
-                    "docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} && ^
-                    docker stop webapp || true && docker rm webapp || true && ^
-                    docker run -d -p 80:3000 --name webapp ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"
-                    """
-                }
+                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+    bat """
+    ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no ec2-user@52.23.185.236 ^
+    "docker pull ${ECR_URL}:${IMAGE_TAG} && ^
+    docker stop webapp || true && docker rm webapp || true && ^
+    docker run -d -p 80:3000 --name webapp ${ECR_URL}:${IMAGE_TAG}"
+    """
+}
             }
         }
     }
