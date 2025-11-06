@@ -65,7 +65,7 @@ pipeline {
     bat """
     ssh -i "%SSH_KEY%" -o StrictHostKeyChecking=no ec2-user@52.23.185.236 ^
     "docker pull ${ECR_URL}:${IMAGE_TAG} && ^
-    docker stop webapp || true && docker rm webapp || true && ^
+    docker stop webapp || exit /b 0 && docker rm webapp || exit /b 0 && ^
     docker run -d -p 80:3000 --name webapp ${ECR_URL}:${IMAGE_TAG}"
     """
 }
