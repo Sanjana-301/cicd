@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         AWS_REGION = 'us-east-1'
-        AWS_ACCOUNT_ID = '<YOUR_AWS_ACCOUNT_ID>'
-        IMAGE_REPO_NAME = 'webapp-ci-cd-demo'
+        AWS_ACCOUNT_ID = '972775291931'
+        IMAGE_REPO_NAME = 'ci-cd'
         IMAGE_TAG = "v${env.BUILD_NUMBER}"
         ECR_URL = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
     }
@@ -13,7 +13,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/<your-username>/webapp-ci-cd-demo.git'
+                git branch: 'main', url: 'https://github.com/Sanjana-301/cicd.git'
             }
         }
 
