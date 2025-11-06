@@ -62,7 +62,7 @@ pipeline {
                 echo 'Deploying container on EC2...'
                 sshagent (credentials: ['ec2-ssh-key']) {
                     bat """
-                    ssh -o StrictHostKeyChecking=no ec2-user@<EC2_PUBLIC_IP> ^
+                    ssh -o StrictHostKeyChecking=no ec2-user@52.23.185.236 ^
                     "docker pull ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} && ^
                     docker stop webapp || true && docker rm webapp || true && ^
                     docker run -d -p 80:3000 --name webapp ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"
