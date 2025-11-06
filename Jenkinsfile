@@ -4,7 +4,7 @@ pipeline {
     environment {
         AWS_REGION = 'us-east-1'
         AWS_ACCOUNT_ID = '972775291931'
-        IMAGE_REPO_NAME = 'ci-cd'
+        IMAGE_REPO_NAME = 'cicd'
         IMAGE_TAG = "v${env.BUILD_NUMBER}"
         ECR_URL = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
     }
@@ -81,14 +81,14 @@ pipeline {
             emailext (
                 subject: "SUCCESS: Build #${BUILD_NUMBER}",
                 body: "The pipeline has been successfully executed and deployed.",
-                to: 'your-email@example.com'
+                to: 'sanjana4047@example.com'
             )
         }
         failure {
             emailext (
                 subject: "FAILURE: Build #${BUILD_NUMBER}",
                 body: "The pipeline failed. Please check the Jenkins logs.",
-                to: 'your-email@example.com'
+                to: 'sanjana4047@example.com'
             )
         }
     }
